@@ -1,0 +1,9 @@
+# simulink ouputs
+testbed/*slprj
+
+# energyplus output folder
+testbed/Output_EPExport_*
+
+# large model
+testbed/WSHP*/*.mat
+
