@@ -8,7 +8,7 @@ par_dir = pwd;
 addpath(strcat(par_dir,'\WSHP'));
 
 %% Load boundary condition
-data = load("Atlanta_Shif_TypSum_RB_2004_TypOcc_TypBehav_NoTES_06162023_105632.mat");
+data = load("../real_data/Tucson_Shif_TypSum_RB_2004_TypOcc_TypBehav_NoTES_03252023_112617.mat");
 % Check and truncate excess data
 if length(data.Measurements) > 1441
     data.Measurements = data.Measurements(1:1441,:);
@@ -50,7 +50,14 @@ for timestep=0:1440
     % This input has been deprecated, provide any randome number works
     HardwareTime = timestep; 
     % Run virutal wshp to get Meas
-    if isempty(CtrlSig) || (CtrlSig(2,1)==0)
+    if timestep == 0
+        run_sys_sim = 0;
+    elseif CtrlSig(2,1) == 0
+        run_sys_sim = 0;
+    else
+        run_sys_sim = 1;
+    end
+    if run_sys_sim < 1
         sup_flow_rate = 0;
         sup_temp = 18;
         sup_humd_ratio = 0.009;
@@ -58,14 +65,13 @@ for timestep=0:1440
         zone_humd_ratio = 0.009;
         inlet_water_temp = inlet_water_temp_b(timestep+1);
         power = 0;
-        sys_stat = 0;
+        sys_stat_p = 0;
     else
         % [DEBUG] 
         debug_bound.sen_load = sen_load_b(timestep+1);
         debug_bound.lat_load = lat_load_b(timestep+1);
         debug_bound.sup_flow_rate = sup_flow_rate_b(timestep+1);
         % Inputs
-        sys_stat = CtrlSig(2,1);
         zone_temp = ZoneInfo(8);
         tstat_spt = ZoneInfo(6);
         inlet_water_temp = inlet_water_temp_b(timestep);
@@ -73,8 +79,9 @@ for timestep=0:1440
         ctrl_step = 12;
         % Run virtual testbed
         [sup_flow_rate, sup_temp, sup_humd_ratio, power, debug] = ...
-            virtual_wshp(sys_stat, zone_temp, tstat_spt, inlet_water_temp, zone_humd_ratio, ctrl_step, debug_bound);
+            virtual_wshp(sys_stat_p, zone_temp, tstat_spt, inlet_water_temp, zone_humd_ratio, ctrl_step, debug_bound);
         inlet_water_temp = inlet_water_temp_b(timestep+1);
+        sys_stat_p = 1;
     end
     
     % Assemble Meas
@@ -84,17 +91,31 @@ for timestep=0:1440
     [ZoneInfo,CtrlSig]=callSim(HardwareTime,timestep,Meas);
     
     % Store debug data
-    if (timestep > 0)
+    if run_sys_sim > 0
         debug_error(timestep+1) = debug.error;
         debug_acc_error(timestep+1) = debug.acc_error;
         debug_sen_load(timestep+1) = debug.sen_load;
         debug_lat_load(timestep+1) = debug.lat_load;
+        debug_comp_spd(timestep+1) = debug.comp_spd;
         debug_zone_temp(timestep+1) = zone_temp;
         debug_tstat_spt(timestep+1) = tstat_spt;
         debug_zone_humd_ratio(timestep+1) = zone_humd_ratio;
     end
+    
+    % Print timestep
+    disp(['Completed timestep: ', num2str(timestep)]);
 end
 
-plot(debug_acc_error);
+% Save debug data
+CollName=load('DBLoc.mat').CollName;
+save(['../sim_data/DEBUG_' CollName '.mat'],...
+      'debug_error',...
+      'debug_acc_error',...
+      'debug_sen_load',...
+      'debug_lat_load',...
+      'debug_comp_spd',...
+      'debug_zone_temp',...
+      'debug_tstat_spt',...
+      'debug_zone_humd_ratio');
 %% save all data to .mat file
 DataDL;

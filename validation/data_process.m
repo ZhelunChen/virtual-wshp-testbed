@@ -13,21 +13,21 @@ if length(data.Measurements) > 1441
     end
 end
 
-% if isfield(data, 'HardwareData')
-%     % Process hardware data file
-%     hdata_name = fieldnames(data.HardwareData);
-%     hdata = eval(['data.HardwareData.' hdata_name{1}]);
-%     [hdata_sim,~] = hwdata_sent(hdata,data.Measurements);
-%     % Data from hardware data file
-%     data.time_step_hdata = [hdata_sim.("Simulation Time Step")]/60;
-%     data.wshp_power_act = [hdata_sim.("WSHP Power [kW]")];
-%     data.inlet_water_temp_act = [hdata_sim.("Inlet Water Temp [°C]")];
-%     % Some old datasets do not have CompSpd
-%     if ismember('CompSpd', hdata_sim.Properties.VariableNames)
-%         vdc_act = [hdata_sim.("CompSpd")];
-%         data.comp_spd_act = spd_ratio(vdc_act);
-%     end
-% end
+if isfield(data, 'HardwareData')
+    % Process hardware data file
+    hdata_name = fieldnames(data.HardwareData);
+    hdata = eval(['data.HardwareData.' hdata_name{1}]);
+    [hdata_sim,~] = hwdata_sent(hdata,data.Measurements);
+    % Data from hardware data file
+    data.time_step_hdata = [hdata_sim.("Simulation Time Step")]/60;
+    data.wshp_power_act = [hdata_sim.("WSHP Power [kW]")];
+    data.inlet_water_temp_act = [hdata_sim.("Inlet Water Temp [°C]")];
+    % Some old datasets do not have CompSpd
+    if ismember('CompSpd', hdata_sim.Properties.VariableNames)
+        vdc = [hdata_sim.("CompSpd")];
+        data.comp_spd = spd_ratio(vdc);
+    end
+end
 
 % Data from Measurements
 data.time_step_sim = [data.Measurements.Timestep]'/60;

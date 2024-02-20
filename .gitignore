@@ -7,3 +7,5 @@ testbed/Output_EPExport_*
 # large model
 testbed/WSHP*/*.mat
 
+# backup version
+testbed_old
