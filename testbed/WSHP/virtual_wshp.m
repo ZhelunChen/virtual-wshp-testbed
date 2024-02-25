@@ -38,8 +38,8 @@ if isempty(comp_spd_model)
     compspd2lat_model = load("wshp_compspd2lat_model");
     fan_spd_model = load("wshp_fan_spd_model");
     fanspd2cfm_model = load("wshp_fanspd2cfm_model");
-    comp_spd_p = zeros(15,1);
-    fan_spd_p = zeros(15,1);
+    comp_spd_p = zeros(5,1);
+    fan_spd_p = zeros(5,1);
     sup_flow_rate_p = zeros(15,1) + 380 * 0.0283 * 1.225 / 60; 
     sup_temp_p = zeros(15,1) + zone_temp;
     sup_humd_ratio_p = zeros(15,1) + zone_humd_ratio;
@@ -61,7 +61,7 @@ hwe = 2501;
 active_spt = tstat_spt + 1.5/1.8;
 
 % Error
-error = zone_temp - active_spt;
+error = max(zone_temp - active_spt, -0.8333);   % 
 
 % Accumulate error with control step adjustment
 new_accumulated_error = acc_error + error * ctrl_step;
@@ -75,31 +75,29 @@ else
 end
 
 % Compressor speed prediction
-X = [error, acc_error, inlet_water_temp, zone_temp];
+X = [error, acc_error];
 comp_spd = predict(comp_spd_model.comp_spd_model, X);
 comp_spd = min(1, max(0, comp_spd));    % Within [0,1]
 fan_spd = predict(fan_spd_model.fan_spd_model, X);
 
-% % Update speed prediction history
-% comp_spd_p = [comp_spd_p(2:end);comp_spd];
-% fan_spd_p = [fan_spd_p(2:end);fan_spd];
-% 
-% % Smooth speed prediction
-% comp_spd = mean(comp_spd_p);
-% fan_spd = mean(fan_spd_p);
-% 
-% % Store smoothed values
-% comp_spd_p(end) = comp_spd;
-% fan_spd_p(end) = fan_spd;
+% Update speed prediction history
+comp_spd_p = [comp_spd_p(2:end);comp_spd];
+fan_spd_p = [fan_spd_p(2:end);fan_spd];
 
-% Power prediction
-X = [inlet_water_temp, zone_temp, comp_spd];
+% Smooth speed prediction
+comp_spd = mean(comp_spd_p);
+fan_spd = mean(fan_spd_p);
+
+% Store smoothed values
+comp_spd_p(end) = comp_spd;
+fan_spd_p(end) = fan_spd;
+
+% Power and load prediction
+X = [inlet_water_temp, zone_temp, zone_humd_ratio, comp_spd];
 power = predict(compspd2power_model.compspd2power_model, X);
 power = max(0, power);  % Not negative
-
-% Capacity prediction
-X = [inlet_water_temp, zone_temp, zone_humd_ratio, comp_spd];
 sen_load = predict(compspd2sen_model.compspd2sen_model, X);
+sen_load = min(0, sen_load);  % Not positive (negative for cooling)
 lat_load = predict(compspd2lat_model.compspd2lat_model, X);
 
 % Flow rate prediction

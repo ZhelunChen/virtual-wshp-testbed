@@ -1,5 +1,5 @@
 stepsize,SeasonType,GEB_case,Control_method,occ_dense,occ_energysaving,TES,recv,ts_recv,coll_recv,Location,STD,Var13,Note,Var15
-60,4,3,0,0,0,0,0,315,current,4,1,NaN,GEB_case,(0-none;1-efficiency;2-shedding;3-shifting;4-modulate)
+60,4,3,0,0,0,0,0,1440,Tucson_Shif_TypSum_RB_2004_TypOcc_TypBehav_NoTES_03252023_112617,4,1,NaN,GEB_case,(0-none;1-efficiency;2-shedding;3-shifting;4-modulate)
 NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,,NaN,NaN,NaN,Control_method,(0-rule based;1-MPC)
 NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,,NaN,NaN,NaN,occ_dense,(0-no;1-yes)
 NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,,NaN,NaN,NaN,occ_energysaving,(0-no;1-yes)

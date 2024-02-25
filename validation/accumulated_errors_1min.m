@@ -20,7 +20,7 @@ function acc_errors = accumulated_errors_1min(pv, spt, criteria_series, reset_th
             current_acc_error = 0;
         else
             % Calculate the error as the difference between temperature and setpoint
-            error = pv(i) - spt(i);
+            error = max(pv(i) - spt(i), -0.8333);
             % control steps in one minute
             ctrl_steps = 12;
             % Total error during a minute

@@ -1063,6 +1063,16 @@ SCS=find(conn,CollName,'Query',['{"Time":',num2str(clock),...
     ',"DocType":"SupvCtrlSig"}']);
 EPlusScheduleVals(3) = EPlusScheduleVals(3)*0.556+SCS.Tz_cspt(2);
 EPlusScheduleVals(4) = EPlusScheduleVals(4)*0.556+SCS.Tz_hspt(2);  
+%% Manual override (Code for dubug only. Comment in formal run. ZC 2024-02-21)
+CollName_b = 'Tucson_Shif_TypSum_RB_2004_TypOcc_TypBehav_NoTES_03252023_112617';
+SimData_DB = find(conn,CollName_b,'Query',['{"Time":',num2str(clock),...
+    ',"DocType":"SimData"}']);
+EPlusScheduleVals(1) = SimData_DB.Pheat;
+EPlusScheduleVals(2) = SimData_DB.Pfan;
+EPlusScheduleVals(3) = SimData_DB.Tz_cspt;
+EPlusScheduleVals(4) = SimData_DB.Tz_hspt;
+EPlusScheduleVals(5) = SimData_DB.WinFrac;
+EPlusScheduleVals(6) = SimData_DB.OccFrac;
 %%
 if (recv<0.5 || clock>time_recv)
 %% normal mode
