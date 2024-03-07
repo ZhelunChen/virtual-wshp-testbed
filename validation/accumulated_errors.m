@@ -20,7 +20,7 @@ function acc_errors = accumulated_errors(pv, spt, criteria_series, reset_thresho
             current_acc_error = 0;
         else
             % Calculate the error as the difference between temperature and setpoint
-            error = pv(i) - spt(i);
+            error = max(pv(i) - spt(i), -1.5/1.8);
             % Constraint the accumulated error
             if current_acc_error + error > 3000
                 current_acc_error = 3000;
